@@ -43,11 +43,17 @@ const handleWebhookEvents = async (req, res) => {
     if (changes.statuses?.[0]) {
       const statusEvent = changes.statuses[0];
       
+      // YEH LINE ADD KAREIN 👇
+      console.log("==== STATUS AAYA ====", statusEvent.status, "ID:", statusEvent.id);
+
       const updatedMessage = await Message.findOneAndUpdate(
         { messageId: statusEvent.id },
         { status: statusEvent.status },
         { new: true }
       );
+
+      // YEH LINE ADD KAREIN 👇
+      console.log("==== DB UPDATE HUA? ====", updatedMessage ? "HAAN" : "NAHI");
 
       if (updatedMessage) {
         req.io.emit('message_status_update', {
