@@ -22,7 +22,7 @@ const handleWebhookEvents = async (req, res) => {
 
     const receiverPhone = changes.metadata?.display_phone_number;
 
-    // Handle Incoming Messages
+  
     if (changes.messages?.[0]) {
       const msg = changes.messages[0];
       const textContent = msg.type === 'text' ? msg.text.body : '';
@@ -39,7 +39,7 @@ const handleWebhookEvents = async (req, res) => {
       req.io.emit('new_message', newMessage);
     }
 
-    // Handle Status Updates
+
     if (changes.statuses?.[0]) {
       const statusEvent = changes.statuses[0];
       
