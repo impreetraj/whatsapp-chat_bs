@@ -13,17 +13,17 @@ const verifyWebhook = (req, res) => {
 };
 
 const handleWebhookEvents = async (req, res) => {
-  try {
-    const { object, entry } = req.body;
-    if (object !== 'whatsapp_business_account') return res.sendStatus(404);
+  const { object, entry } = req.body;
+  if (object !== 'whatsapp_business_account') return res.sendStatus(404);
 
-    const changes = entry?.[0]?.changes?.[0]?.value;
-    if (!changes) return res.sendStatus(200);
+  const changes = entry?.[0]?.changes?.[0]?.value;
+  if (!changes) return res.sendStatus(200);
 
-    const receiverPhone = changes.metadata?.display_phone_number;
+  const receiverPhone = changes.metadata?.display_phone_number;
 
-  
-    if (changes.messages?.[0]) {
+  // Incoming Messages - Alag try/catch
+  if (changes.messages?.[0]) {
+    try {
       const msg = changes.messages[0];
       const textContent = msg.type === 'text' ? msg.text.body : '';
 
@@ -37,14 +37,21 @@ const handleWebhookEvents = async (req, res) => {
       });
 
       req.io.emit('new_message', newMessage);
+      console.log('New message saved:', msg.id);
+    } catch (err) {
+      if (err.code === 11000) {
+        console.log('Duplicate message ignored:', changes.messages[0].id);
+      } else {
+        console.error('Message save error:', err.message);
+      }
     }
+  }
 
-
-    if (changes.statuses?.[0]) {
+  // Status Updates - Alag try/catch
+  if (changes.statuses?.[0]) {
+    try {
       const statusEvent = changes.statuses[0];
-      
-      // YEH LINE ADD KAREIN 👇
-      console.log("==== STATUS AAYA ====", statusEvent.status, "ID:", statusEvent.id);
+      console.log('STATUS AAYA:', statusEvent.status, 'ID:', statusEvent.id);
 
       const updatedMessage = await Message.findOneAndUpdate(
         { messageId: statusEvent.id },
@@ -52,8 +59,7 @@ const handleWebhookEvents = async (req, res) => {
         { new: true }
       );
 
-      // YEH LINE ADD KAREIN 👇
-      console.log("==== DB UPDATE HUA? ====", updatedMessage ? "HAAN" : "NAHI");
+      console.log('DB UPDATE HUA?', updatedMessage ? 'HAAN' : 'NAHI');
 
       if (updatedMessage) {
         req.io.emit('message_status_update', {
@@ -62,13 +68,13 @@ const handleWebhookEvents = async (req, res) => {
           updatedMessage
         });
       }
+    } catch (err) {
+      console.error('Status update error:', err.message);
     }
-
-    res.sendStatus(200);
-  } catch (error) {
-    console.error('Webhook error:', error);
-    res.sendStatus(500);
   }
+
+  // HAMESHA 200 bhejo taaki Meta webhook band na kare!
+  res.sendStatus(200);
 };
 
 module.exports = { verifyWebhook, handleWebhookEvents };
