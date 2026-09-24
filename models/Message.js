@@ -5,7 +5,7 @@ const messageSchema = new mongoose.Schema({
   senderPhone: { type: String, required: true },
   receiverPhone: { type: String, required: true },
   textContent: { type: String },
-  status: { type: String, enum: ['sent', 'delivered', 'read'], default: 'sent' },
+  status: { type: String, enum: ['sent', 'delivered', 'read' , 'failed'], default: 'sent' },
   timestamp: { type: Date, default: Date.now },
 }, { timestamps: true });
 
