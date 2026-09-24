@@ -4,6 +4,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const connectDB = require('./config/db');
 const webhookRoutes = require('./routes/webhookRoutes');
+const messageRoutes = require('./routes/messageRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -27,6 +28,7 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/webhook', webhookRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
