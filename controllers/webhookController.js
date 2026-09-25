@@ -13,6 +13,9 @@ const verifyWebhook = (req, res) => {
 };
 
 const handleWebhookEvents = async (req, res) => {
+  // YEH NAYI LINE DAALNI HAI:
+  console.log("🔥 WEBHOOK RECEIVED 🔥\n", JSON.stringify(req.body, null, 2));
+
   const { object, entry } = req.body;
   if (object !== 'whatsapp_business_account') return res.sendStatus(404);
 
